@@ -57,10 +57,15 @@ public class Controller extends HttpServlet {
 		switch (op) {
 		case "1":
 			Articulo a1 = new Articulo(0, "televisor", "televisor lg 45''", 560);
-			if(test.registrar(a1)) {
-				System.out.println("controller: Se agrego un articulo ");
-			}else {
-				System.out.println("controller: NO se agrego un articulo ");
+			try {
+				if(test.registrar(a1)) {
+					System.out.println("controller: Se agrego un articulo ");
+				}else {
+					System.out.println("controller: NO se agrego un articulo ");
+				}
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 			break;
 

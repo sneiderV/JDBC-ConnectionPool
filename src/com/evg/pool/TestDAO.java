@@ -8,6 +8,7 @@ import com.mysql.cj.api.jdbc.Statement;
 
 public class TestDAO {
 	private Conexion con;
+	private Connection connection = null;
 	
 	public TestDAO(String url, String userName, String password) throws SQLException {
 		con = new Conexion(url, userName, password);
@@ -22,26 +23,30 @@ public class TestDAO {
 	/**
 	 * registra una revista
 	 * @return true 
+	 * @throws SQLException 
 	 */
-	public boolean registrar(Articulo a) {
+	public boolean registrar(Articulo a) throws SQLException {
 		boolean estado = false; 
-		Statement stm;
+		java.sql.Statement stm;
+		
+		connection = getConnection();
+		
 		//el ID es null porque la base de datos lo tiene autoincrementable
 		String sql = "INSERT INTO articulos VALUES(NULL,'"+a.getNombre()+"','"+a.getDescripcion()+"',"+a.getPrecio()+" )";
 		
 		try {
-			con.connection(); //abrimos la conexion
-			con.getConnection().setAutoCommit(false); // se indica el inicio de la transaccion
-			stm = (Statement) con.getConnection().createStatement();
+			//con.connection(); //abrimos la conexion
+			connection.setAutoCommit(false); // se indica el inicio de la transaccion
+			stm = connection.createStatement();
 			stm.executeUpdate(sql);
-			con.getConnection().commit(); // si todo va bien hacemos comit y guardamos los datos
+			connection.commit(); // si todo va bien hacemos comit y guardamos los datos
 			stm.close();
-			con.discconect();
+			connection.close();
 			estado = true;
 			
 		} catch (SQLException e) {
 			try {
-				con.getConnection().rollback(); // si algo salio mal en la transaccion hacemos roollback y no se guarda ningun registro
+				connection.rollback(); // si algo salio mal en la transaccion hacemos roollback y no se guarda ningun registro
 				e.printStackTrace();
 			} catch (SQLException e1) {
 				e1.printStackTrace();
@@ -155,5 +160,14 @@ public class TestDAO {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	/**
+	 * accede a la conexion de la clase pool
+	 * @return
+	 * @throws SQLException
+	 */
+	private Connection getConnection() throws SQLException {
+		return pool.getConexion();
 	}
 }
